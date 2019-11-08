@@ -1,3 +1,4 @@
+/// AMF - Associated Methods and Functions
 extern crate pretty_env_logger;
 extern crate structopt;
 
@@ -11,7 +12,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "amf")]
+#[structopt(name = "AMF - Associated Methods and Functions")]
 /// Simple Audio Video Encoding tool
 struct Opt {
     /// Input file
@@ -31,5 +32,12 @@ fn main() {
 
     let syntax = syn::parse_file(&src).expect("Unable to parse file");
 
-    amf_count(syntax);
+    let res = amf_count(syntax);
+
+    if !res.is_empty() {
+        println!("Item\t\t\tAMF");
+        for (item, amf) in res {
+            println!("{}\t\t\t{}", item, amf);
+        }
+    }
 }
