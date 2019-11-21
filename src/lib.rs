@@ -4,9 +4,9 @@ extern crate syn;
 extern crate log;
 
 use std::collections::BTreeMap;
-use syn::{Ident, ImplItem, Item, Type};
+use syn::{ImplItem, Item, Type};
 
-pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<Ident, u32> {
+pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<String, u32> {
     // global type counter
     let mut amfs = BTreeMap::new();
 
@@ -37,7 +37,7 @@ pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<Ident, u32> {
                 };
             }
 
-            amfs.entry(ident.clone())
+            amfs.entry(ident.to_string())
                 .and_modify(|v| *v += amf_per_impl)
                 .or_insert(amf_per_impl);
         }

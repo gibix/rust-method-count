@@ -1,5 +1,6 @@
 /// AMF - Associated Methods and Functions
 extern crate pretty_env_logger;
+extern crate serde;
 extern crate structopt;
 
 use rust_method_count::*;
@@ -18,6 +19,9 @@ struct Opt {
     /// Input file
     #[structopt(short = "i", parse(from_os_str))]
     input: PathBuf,
+    /// Json out
+    #[structopt(short = "j", long = "json out format")]
+    is_json: bool,
 }
 
 fn main() {
@@ -34,7 +38,13 @@ fn main() {
 
     let res = amf_count(syntax);
 
-    if !res.is_empty() {
+    if opt.is_json {
+        let serialized = serde_json::to_string(&res).unwrap();
+
+        println!("{}", serialized);
+
+    } else if !res.is_empty() {
+
         println!("Item\t\t\tAMF");
         for (item, amf) in res {
             println!("{}\t\t\t{}", item, amf);
