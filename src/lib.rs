@@ -89,3 +89,42 @@ pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<String, ItemCount> {
 
     amfs
 }
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    fn test_amf_over_str(file: &str) -> ItemCount {
+        let ast = syn::parse_file(&file).unwrap();
+        let res = amf_count(ast);
+        res["Tstruct"]
+    }
+
+    #[test]
+    fn amf_test() {
+        static AMF_TEST_FILE: &'static str = "
+struct Tstruct {}
+
+impl Tstruct {
+    fn tfn() { }
+    pub fn pubtfn() { }
+}
+
+trait Ttrait {
+    fn trfn();
+}
+
+impl Ttrait for Tstruct {
+    fn trfn() { }
+}
+";
+
+        assert_eq!(
+            test_amf_over_str(AMF_TEST_FILE),
+            ItemCount {
+                public: 1,
+                private: 2
+            }
+        );
+    }
+}
