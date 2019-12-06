@@ -15,10 +15,16 @@ trait Ttrait {
 }
 
 impl Ttrait for Tstruct {
-    fn trfn() { }
+    pub fn trfn() { }
 }
 
-mod submod;
+mod submod {
+    impl Tstruct {
+        fn tfn() { }
+    }
+}
+
+mod extsubmod;
 
 fn main() {
     println!("Hello, world!");
