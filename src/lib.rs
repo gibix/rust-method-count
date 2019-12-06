@@ -3,10 +3,47 @@ extern crate syn;
 #[macro_use]
 extern crate log;
 
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::collections::BTreeMap;
-use syn::{ImplItem, Item, Type};
+use syn::{ImplItem, Item, Type, Visibility};
 
-pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<String, u32> {
+/// Store the result
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
+pub struct ItemCount {
+    /// Number of public associated functions or methods
+    public: u32,
+    /// Number of private associated functions or methods
+    private: u32,
+}
+
+impl ItemCount {
+    pub fn private(self: Self) -> u32 {
+        self.public
+    }
+
+    pub fn public(self: Self) -> u32 {
+        self.private
+    }
+
+    pub fn total(self: Self) -> u32 {
+        self.private + self.public
+    }
+}
+
+impl Serialize for ItemCount {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("NumberOfMethods", 3)?;
+        state.serialize_field("public", &self.public)?;
+        state.serialize_field("private", &self.private)?;
+        state.serialize_field("total", &(self.public + self.private))?;
+        state.end()
+    }
+}
+
+pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<String, ItemCount> {
     // global type counter
     let mut amfs = BTreeMap::new();
 
@@ -24,22 +61,29 @@ pub fn amf_count(syntax_tree: syn::File) -> BTreeMap<String, u32> {
             }
 
             // count associated methods into an impl block
-            let mut amf_per_impl: u32 = 0;
+            let mut entry = ItemCount::default();
 
             for impl_item_methods in impl_item.items.iter() {
                 if let ImplItem::Method(m) = impl_item_methods {
                     debug!(
                         "Item: {}\tFound method {}",
                         ident.to_string(),
-                        m.sig.ident.to_string()
+                        m.sig.ident.to_string(),
                     );
-                    amf_per_impl += 1;
+                    if let Visibility::Public(_) = m.vis {
+                        entry.public += 1;
+                    } else {
+                        entry.private += 1;
+                    };
                 };
             }
 
             amfs.entry(ident.to_string())
-                .and_modify(|v| *v += amf_per_impl)
-                .or_insert(amf_per_impl);
+                .and_modify(|v: &mut ItemCount| {
+                    v.public += entry.public;
+                    v.private += entry.private;
+                })
+                .or_insert(entry);
         }
     }
 

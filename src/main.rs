@@ -42,12 +42,10 @@ fn main() {
         let serialized = serde_json::to_string(&res).unwrap();
 
         println!("{}", serialized);
-
     } else if !res.is_empty() {
-
         println!("Item\t\t\tAMF");
         for (item, amf) in res {
-            println!("{}\t\t\t{}", item, amf);
+            println!("{}\t\t\t{:?}", item, amf);
         }
     }
 }
