@@ -14,7 +14,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "AMF - Associated Methods and Functions")]
-/// Simple Audio Video Encoding tool
+/// Associated Methods and Functions Counter
 struct Opt {
     /// Input file
     #[structopt(short = "i", parse(from_os_str))]
