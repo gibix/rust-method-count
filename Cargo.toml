@@ -1,5 +1,5 @@
 [package]
-name = "rust-method-count"
+name = "code-metrics"
 version = "0.1.0"
 authors = ["gibix <gibix@riseup.net>"]
 edition = "2018"
