@@ -25,6 +25,10 @@ impl ItemCount {
     pub fn public(self: Self) -> u32 {
         self.private
     }
+
+    pub fn total(self: Self) -> u32 {
+        self.private + self.public
+    }
 }
 
 impl Serialize for ItemCount {
