@@ -3,8 +3,7 @@ extern crate pretty_env_logger;
 extern crate serde;
 extern crate structopt;
 
-use code_metrics::associated_method::*;
-use code_metrics::cognitive_complexity::*;
+use code_metrics::*;
 
 use std::fs::File;
 use std::io::Read;
@@ -44,18 +43,24 @@ fn main() {
     complexity.visit_file(&syntax);
 
     if opt.is_json {
-        let serialized = serde_json::to_string(&counter.tree).unwrap();
+        let metrics = AggregatedMetrics {
+            cc: complexity.tree,
+            amf: counter.tree,
+        };
+        let s_metrics = serde_json::to_string(&metrics).unwrap();
 
-        println!("{}", serialized);
+        println!("{}", s_metrics);
     } else if !counter.tree.is_empty() || !complexity.tree.is_empty() {
-        println!("Item\t\t\tCimplexity\t\t\tAMF");
+        println!("Item\t\t\tAMF");
         for (item, amf) in counter.tree {
-            let cc = match complexity.tree.get(&item) {
-                Some(v) => v.to_string(),
-                None => "undefined".to_owned()
-            };
-            let cc = cc.to_string();
-            println!("{}\t\t\t{}\t\t\t{:?}", item, cc, amf.total());
+            println!("{}\t\t\t{:?}", item, amf.total());
+        }
+
+        println!("==========================");
+
+        println!("Function\t\tComplexity");
+        for (f, cc) in complexity.tree {
+            println!("{}\t\t\t{}", f, cc);
         }
     }
 }

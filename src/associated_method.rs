@@ -184,7 +184,7 @@ impl<'ast> AMF {
 
 #[cfg(test)]
 mod test {
-    use crate::*;
+    use crate::associated_method::*;
 
     fn test_amf_over_str(file: &str) -> ItemCount {
         let ast = syn::parse_file(&file).unwrap();

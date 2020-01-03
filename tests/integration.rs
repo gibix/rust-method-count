@@ -1,4 +1,4 @@
-extern crate rust_method_count;
+extern crate code_metrics;
 
 #[test]
 fn rust_project() {}

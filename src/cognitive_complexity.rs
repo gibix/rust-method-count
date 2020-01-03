@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 pub use syn::visit::{self, Visit};
-use syn::{ExprMatch, ItemFn, ExprIf};
+use syn::{ExprIf, ExprMatch, ImplItemMethod, ItemFn};
 
 #[derive(Default)]
 pub struct CognitiveComplexity {
@@ -23,6 +23,17 @@ impl<'ast> Visit<'ast> for CognitiveComplexity {
             .and_modify(|v| *v += helper.cc)
             .or_insert(helper.cc);
     }
+
+    fn visit_impl_item_method(&mut self, f: &ImplItemMethod) {
+        let mut helper = CCHelper { cc: 1 };
+        helper.visit_block(&f.block);
+
+        debug!("{:?}", f.sig);
+        self.tree
+            .entry(f.sig.ident.to_string())
+            .and_modify(|v| *v += helper.cc)
+            .or_insert(helper.cc);
+    }
 }
 
 struct CCHelper {
@@ -31,7 +42,7 @@ struct CCHelper {
 
 impl<'tcx> Visit<'tcx> for CCHelper {
     fn visit_expr_match(&mut self, e: &ExprMatch) {
-        // walk_expr(self, e);
+        // walk_expr ?
         if e.arms.len() > 1 {
             self.cc += 1;
         }
@@ -39,9 +50,8 @@ impl<'tcx> Visit<'tcx> for CCHelper {
     }
 
     fn visit_expr_if(&mut self, i: &ExprIf) {
-        // walk_expr(self, e);
         if i.else_branch.is_some() {
-            self.cc +=1;
+            self.cc += 1;
         }
     }
 }
